@@ -1,4 +1,4 @@
-# 🚗 Ride Matcher Service v2.0
+# Ride Matcher Service
 
 Intelligent ride matching microservice for community carpooling, designed to work with [grace-link-jc](https://github.com/your-org/grace-link-jc). Given passengers who need rides and drivers who can give them, this service optimally groups them together for safe, efficient trips to and from community events.
 
@@ -35,6 +35,8 @@ This service automatically:
 - **Early Departure (Outbound)** — Groups early-leavers with early-leaving drivers
 - **Pickup Scheduling (Inbound)** — Backward calculation ensures on-time arrival
 - **Hard Constraints** — Early passengers can't ride with late drivers; pickups can't be before ready times
+- **Calculated Pickup Times** - System tells passengers when to be ready (`shouldBeReadyBy`)
+- **Schedule Response** - Inbound results include driver departure time and all pickup times
 
 ### Optimization
 - **Furthest Driver First** — Drivers with longer routes are processed first (larger "catchment area")
@@ -45,19 +47,6 @@ This service automatically:
 - **Unmatched Tracking** — Lists passengers who couldn't be matched with specific reasons
 - **Suggested Actions** — Provides guidance for unmatched passengers (e.g., "arrange rideshare")
 - **Admin Overrides** — Manual adjustment of results after matching
-
----
-
-## What's New in v2.0
-
-| Feature | Description |
-|---------|-------------|
-| **Inbound Matching** | Pick up passengers on the way TO an event |
-| **Hard Timing Constraints** | Early passengers rejected from non-early drivers (not just low score) |
-| **Calculated Pickup Times** | System tells passengers when to be ready (`shouldBeReadyBy`) |
-| **Everyone Gets a Ride** | Outbound trips prioritize giving everyone a ride, even with longer detours |
-| **Trip Direction API** | Single endpoint handles both `TO_EVENT` and `FROM_EVENT` |
-| **Schedule Response** | Inbound results include driver departure time and all pickup times |
 
 ---
 
