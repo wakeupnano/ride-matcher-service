@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카풀 매칭 시뮬레이션 테스트보드</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Left Sidebar Controls -->
+        <aside class="sidebar">
+            <div class="header">
+                <h1>카풀 매칭 시뮬레이터</h1>
+                <p class="subtitle">교회 커뮤니티 카풀 서비스</p>
+            </div>
+
+            <!-- Event Configuration -->
+            <section class="control-section">
+                <h2>행사 설정</h2>
+                <div class="form-group">
+                    <label>위치 (위도)</label>
+                    <input type="number" id="eventLat" step="0.0001" value="39.9556" class="input">
+                </div>
+                <div class="form-group">
+                    <label>위치 (경도)</label>
+                    <input type="number" id="eventLng" step="0.0001" value="-75.1944" class="input">
+                </div>
+                <div class="form-group">
+                    <label>시작 시간</label>
+                    <input type="datetime-local" id="eventTime" class="input">
+                </div>
+                <div class="form-group">
+                    <label>이동 방향</label>
+                    <select id="tripDirection" class="input">
+                        <option value="from_event">행사 → 집</option>
+                        <option value="to_event">집 → 행사</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Preset Scenarios -->
+            <section class="control-section">
+                <h2>프리셋 시나리오</h2>
+                <div class="preset-buttons" id="presetButtons"></div>
+            </section>
+
+            <!-- Participant Configuration -->
+            <section class="control-section">
+                <h2>참가자 설정</h2>
+                <div class="form-group">
+                    <label>승객 수: <span id="passengerCount">10</span></label>
+                    <input type="range" id="passengerSlider" min="1" max="50" value="10" class="slider">
+                </div>
+                <div class="form-group">
+                    <label>드라이버 수: <span id="driverCount">3</span></label>
+                    <input type="range" id="driverSlider" min="1" max="15" value="3" class="slider">
+                </div>
+                <div class="form-group">
+                    <label>조기 출발 비율: <span id="earlyRatio">10</span>%</label>
+                    <input type="range" id="earlySlider" min="0" max="100" value="10" class="slider">
+                </div>
+                <div class="form-group">
+                    <label>성별 선호 비율: <span id="genderRatio">20</span>%</label>
+                    <input type="range" id="genderSlider" min="0" max="100" value="20" class="slider">
+                </div>
+            </section>
+
+            <!-- Advanced Algorithm Settings (Collapsible) -->
+            <section class="control-section">
+                <h2 class="collapsible-header" id="advancedToggle">
+                    알고리즘 설정
+                    <span class="collapse-icon" id="collapseIcon">+</span>
+                </h2>
+                <div id="advancedPanel" class="advanced-panel collapsed">
+                    <!-- Matcher Weights -->
+                    <div class="subsection">
+                        <h3>매처 가중치</h3>
+                        <div class="form-group">
+                            <label><input type="checkbox" id="toggleRouteEfficiency" checked class="matcher-toggle"> 경로 효율: <span id="weightRouteVal">40</span>%</label>
+                            <input type="range" id="weightRoute" min="0" max="100" value="40" class="slider slider-sm">
+                        </div>
+                        <div class="form-group">
+                            <label><input type="checkbox" id="toggleDetour" checked class="matcher-toggle"> 우회 거리: <span id="weightDetourVal">25</span>%</label>
+                            <input type="range" id="weightDetour" min="0" max="100" value="25" class="slider slider-sm">
+                        </div>
+                        <div class="form-group">
+                            <label><input type="checkbox" id="toggleGender" checked class="matcher-toggle"> 성별 매칭: <span id="weightGenderVal">15</span>%</label>
+                            <input type="range" id="weightGender" min="0" max="100" value="15" class="slider slider-sm">
+                        </div>
+                        <div class="form-group">
+                            <label><input type="checkbox" id="toggleDriverPref" checked class="matcher-toggle"> 운전자 선호: <span id="weightDriverPrefVal">15</span>%</label>
+                            <input type="range" id="weightDriverPref" min="0" max="100" value="15" class="slider slider-sm">
+                        </div>
+                        <div class="form-group">
+                            <label><input type="checkbox" id="toggleAge" checked class="matcher-toggle"> 나이 매칭: <span id="weightAgeVal">5</span>%</label>
+                            <input type="range" id="weightAge" min="0" max="100" value="5" class="slider slider-sm">
+                        </div>
+                        <div class="weight-total">
+                            합계: <span id="weightTotal">100</span>% <span id="weightWarning" class="weight-warning hidden">(자동 정규화됨)</span>
+                        </div>
+                    </div>
+
+                    <!-- Thresholds -->
+                    <div class="subsection">
+                        <h3>임계값</h3>
+                        <div class="form-group">
+                            <label>최대 우회 거리: <span id="detourLimitVal">20</span> mi</label>
+                            <input type="range" id="detourLimit" min="5" max="50" value="20" class="slider slider-sm">
+                        </div>
+                        <div class="form-group">
+                            <label>교통 버퍼: <span id="trafficBufferVal">1.3</span>x</label>
+                            <input type="range" id="trafficBuffer" min="10" max="25" value="13" class="slider slider-sm">
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="enforceGender" class="matcher-toggle">
+                                성별 선호 강제 (하드 제약)
+                            </label>
+                        </div>
+                    </div>
+
+                    <button id="resetAdvancedBtn" class="btn btn-secondary btn-sm">기본값 복원</button>
+                </div>
+            </section>
+
+            <!-- Action Buttons -->
+            <section class="control-section">
+                <button id="generateBtn" class="btn btn-secondary">데이터 재생성</button>
+                <button id="runBtn" class="btn btn-primary">시뮬레이션 실행</button>
+                <button id="resetBtn" class="btn btn-reset">초기화</button>
+            </section>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Map Container -->
+            <div class="map-container">
+                <div id="map"></div>
+                <div id="loadingOverlay" class="loading-overlay hidden">
+                    <div class="spinner"></div>
+                    <p>매칭 알고리즘 실행 중...</p>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div id="resultsPanel" class="results-panel hidden"></div>
+        </main>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+
+    <!-- Application JS -->
+    <script src="/js/data-generator.js"></script>
+    <script src="/js/presets.js"></script>
+    <script src="/js/map.js"></script>
+    <script src="/js/simulation.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>

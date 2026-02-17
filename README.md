@@ -62,6 +62,51 @@ Service runs at `http://localhost:3001`
 
 ---
 
+## Simulation Testboard
+
+A browser-based visual testboard for testing and debugging the matching algorithm interactively.
+
+### Usage
+
+1. Start the server:
+   ```bash
+   npm run dev
+   ```
+
+2. Open your browser:
+   ```
+   http://localhost:3001
+   ```
+
+3. Select a preset scenario or configure sliders manually, then click **"시뮬레이션 실행"** (Run Simulation).
+
+### Features
+
+- **Interactive Map** — Leaflet-based map showing pre-match markers and post-match route polylines
+- **10 Preset Scenarios** — Sunday worship, Friday youth group, Christmas service, senior ministry, bad weather emergency, and more
+- **Participant Controls** — Adjust passenger count (1–50), driver count (1–15), early departure ratio, and gender preference ratio via sliders
+- **Algorithm Tuning** — Real-time adjustment of matcher weights, max detour distance, traffic buffer, and gender enforcement
+- **Results Panel** — Match rate, ride group details with stop order, detour per passenger, and unmatched passenger reasons
+
+### Testboard Structure
+
+```
+public/
+├── index.html            # Main UI (sidebar + map layout)
+├── css/
+│   └── style.css         # Styles
+└── js/
+    ├── app.js            # App controller (event binding, state management)
+    ├── simulation.js     # API integration + result rendering
+    ├── data-generator.js # Philadelphia-based test data generator
+    ├── presets.js        # 10 church scenario presets
+    └── map.js            # Leaflet map visualization
+```
+
+> **Note:** Works without a Google Maps API key. The mock geocoding service uses Haversine-based distance calculations.
+
+---
+
 ## API Reference
 
 ### Match Passengers to Drivers
@@ -681,22 +726,31 @@ ALLOWED_ORIGINS=http://localhost:5173,https://your-grace-link-jc.web.app
 
 ```
 ride-matcher-service/
+├── public/                      # Simulation testboard (served as static files)
+│   ├── index.html               # Main UI
+│   ├── css/style.css            # Styles
+│   └── js/
+│       ├── app.js               # App controller
+│       ├── simulation.js        # API integration + result rendering
+│       ├── data-generator.js    # Test data generator
+│       ├── presets.js           # Preset scenarios
+│       └── map.js               # Leaflet map visualization
 ├── src/
 │   ├── config/
-│   │   └── config.ts          # Matching configuration
+│   │   └── config.ts            # Matching configuration
 │   ├── matchers/
-│   │   ├── BaseMatcher.ts     # Abstract matcher interface
-│   │   ├── MatchingEngine.ts  # Core algorithm
-│   │   └── implementations.ts # All matchers (Timing, Capacity, etc.)
+│   │   ├── BaseMatcher.ts       # Abstract matcher interface
+│   │   ├── MatchingEngine.ts    # Core algorithm
+│   │   └── implementations.ts   # All matchers (Timing, Capacity, etc.)
 │   ├── models/
-│   │   └── types.ts           # TypeScript interfaces
+│   │   └── types.ts             # TypeScript interfaces
 │   ├── routes/
-│   │   └── matchRoutes.ts     # Express routes
+│   │   └── matchRoutes.ts       # Express routes
 │   ├── utils/
-│   │   └── geocoding.ts       # Geocoding services
-│   └── index.ts               # Entry point
+│   │   └── geocoding.ts         # Geocoding services
+│   └── index.ts                 # Entry point
 ├── tests/
-│   └── matching.test.ts       # Test suite
+│   └── matching.test.ts         # Test suite
 ├── .env.example
 ├── package.json
 ├── tsconfig.json

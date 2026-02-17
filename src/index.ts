@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import matchRoutes from './routes/matchRoutes';
 import { loadEnvironmentConfig } from './config/config';
 
@@ -26,6 +27,9 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Static files for simulation testboard
+app.use(express.static(path.join(__dirname, '../public')));
+
 // Request logging (development)
 if (envConfig.nodeEnv === 'development') {
   app.use((req, res, next) => {
@@ -40,26 +44,6 @@ if (envConfig.nodeEnv === 'development') {
 
 // API routes
 app.use('/api', matchRoutes);
-
-// Root endpoint
-app.get('/', (req, res) => {
-  res.json({
-    name: 'Ride Matcher Service',
-    version: '1.0.0',
-    description: 'Intelligent ride matching for community carpooling',
-    endpoints: {
-      health: 'GET /api/health',
-      match: 'POST /api/match',
-      getResult: 'GET /api/match/:resultId',
-      override: 'POST /api/match/:resultId/override',
-      listConfigs: 'GET /api/config',
-      getConfig: 'GET /api/config/:configId',
-      updateConfig: 'PUT /api/config/:configId',
-      updatePriority: 'PUT /api/config/:configId/priority'
-    },
-    documentation: '/docs'
-  });
-});
 
 // =============================================================================
 // ERROR HANDLING
